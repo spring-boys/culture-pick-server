@@ -3,6 +3,7 @@ package com.ssafy.culturepick.auth.service;
 import com.ssafy.culturepick.auth.dto.RegenerateToken;
 import com.ssafy.culturepick.auth.dto.request.SignupRequest;
 import com.ssafy.culturepick.auth.jwt.TokenProvider;
+import com.ssafy.culturepick.auth.repository.EmailVerificationRepository;
 import com.ssafy.culturepick.auth.repository.RefreshTokenRepository;
 import com.ssafy.culturepick.global.exception.code.AuthErrorCode;
 import com.ssafy.culturepick.global.exception.code.MemberErrorCode;
@@ -26,12 +27,17 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final EmailVerificationRepository emailVerificationRepository;
 
     public void signup(SignupRequest request) {
-        // TODO 유효성 검사 (이메일 인증, 닉네임 중복 등)
+        if (!emailVerificationRepository.isVerified(request.getEmail())) {
+            throw new BusinessException(AuthErrorCode.EMAIL_NOT_VERIFIED);
+        }
 
         Member member = Member.create(request.getEmail(), passwordEncoder.encode(request.getPassword()), request.getNickname());
         memberRepository.save(member);
+
+        emailVerificationRepository.deleteVerified(request.getEmail());
     }
 
     public RegenerateToken regenerate(String refreshToken) {
