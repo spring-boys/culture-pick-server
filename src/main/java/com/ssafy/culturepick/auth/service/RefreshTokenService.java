@@ -11,6 +11,6 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     public void save(Long memberId, String refreshToken) {
-
+        refreshTokenRepository.save(memberId, refreshToken);
     }
 }

@@ -1,6 +1,6 @@
 package com.ssafy.culturepick.global.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.ssafy.culturepick.auth.filter.JwtAuthenticationFilter;
 import com.ssafy.culturepick.auth.filter.LoginFilter;
 import com.ssafy.culturepick.auth.jwt.TokenProvider;
@@ -42,6 +42,9 @@ public class WebSecurityConfig {
     @Value("${cors.allowed-origins}")
     private String allowedOrigins;
 
+    @Value("${cookie.secure}")
+    private boolean cookieSecure;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -60,8 +63,8 @@ public class WebSecurityConfig {
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
 
-                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(), tokenProvider, refreshTokenService, objectMapper), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, objectMapper), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(), tokenProvider, refreshTokenService, objectMapper, cookieSecure), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -72,7 +75,7 @@ public class WebSecurityConfig {
 
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of(allowedOrigins));
-        config.setAllowedMethods(List.of("HEAD","POST","GET","DELETE","PUT", "PATCH"));
+        config.setAllowedMethods(List.of("HEAD","POST","GET","DELETE", "PUT", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

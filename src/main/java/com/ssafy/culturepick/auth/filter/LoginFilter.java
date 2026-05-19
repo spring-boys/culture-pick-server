@@ -1,7 +1,6 @@
 package com.ssafy.culturepick.auth.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.culturepick.auth.dto.LoginRequest;
+import com.ssafy.culturepick.auth.dto.request.LoginRequest;
 import com.ssafy.culturepick.auth.jwt.TokenProvider;
 import com.ssafy.culturepick.auth.security.CustomMemberDetails;
 import com.ssafy.culturepick.auth.service.RefreshTokenService;
@@ -20,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Map;
@@ -33,13 +33,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final TokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final ObjectMapper objectMapper;
+    private final boolean cookieSecure;
 
-    public LoginFilter(AuthenticationManager authenticationManager, TokenProvider tokenProvider, RefreshTokenService refreshTokenService, ObjectMapper objectMapper) {
+    public LoginFilter(AuthenticationManager authenticationManager, TokenProvider tokenProvider, RefreshTokenService refreshTokenService, ObjectMapper objectMapper, boolean cookieSecure) {
         setFilterProcessesUrl("/api/v1/auth/login");
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.refreshTokenService = refreshTokenService;
         this.objectMapper = objectMapper;
+        this.cookieSecure = cookieSecure;
     }
 
     @Override
@@ -71,7 +73,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.warn("로그인 실패: {}", failed.getMessage());
-        FilterResponse.fail(response, AuthErrorCode.INVALID_USERNAME_PASSWORD);
+        FilterResponse.fail(response, AuthErrorCode.INVALID_USERNAME_PASSWORD, objectMapper);
     }
 
     private void addAccessTokenToBody(HttpServletResponse res, String accessToken) throws IOException {
@@ -82,6 +84,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
         int cookieMaxAge = (int) REFRESH_TOKEN_DURATION.toSeconds();
-        CookieUtil.addCookie(response, REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieMaxAge);
+        CookieUtil.addCookie(response, REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieMaxAge, cookieSecure);
     }
 }

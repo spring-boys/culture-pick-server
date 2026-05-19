@@ -9,10 +9,11 @@ import java.util.Base64;
 
 public class CookieUtil {
 
-    public static void addCookie(HttpServletResponse res, String name, String value, int maxAge) {
+    public static void addCookie(HttpServletResponse res, String name, String value, int maxAge, boolean secure) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
+        cookie.setSecure(secure);
         cookie.setMaxAge(maxAge);
         res.addCookie(cookie);
     }

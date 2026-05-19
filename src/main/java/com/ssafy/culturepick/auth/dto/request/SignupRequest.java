@@ -1,12 +1,13 @@
-package com.ssafy.culturepick.auth.dto;
+package com.ssafy.culturepick.auth.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class LoginRequest {
+public class SignupRequest {
 
     private String email;
     private String password;
+    private String nickname;
 }

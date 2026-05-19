@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 
@@ -18,6 +19,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
+    private final ObjectMapper objectMapper;
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
 
@@ -33,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (BusinessException e) {
                 SecurityContextHolder.clearContext();
-                FilterResponse.fail(response, e.getErrorCode());
+                FilterResponse.fail(response, e.getErrorCode(), objectMapper);
                 return;
             }
         }

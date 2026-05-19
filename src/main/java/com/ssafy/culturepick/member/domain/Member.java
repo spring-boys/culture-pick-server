@@ -34,7 +34,18 @@ public class Member extends BaseEntity {
         this.role = role;
     }
 
+    private Member(String email, String password, String nickname, Role role) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.role = role;
+    }
+
     public static Member createMemberByToken(Long id, Role role) {
         return new Member(id, role);
+    }
+
+    public static Member create(String email, String encodedPassword, String nickname) {
+        return new Member(email, encodedPassword, nickname, Role.ROLE_MEMBER);
     }
 }
