@@ -1,9 +1,12 @@
 package com.ssafy.culturepick.global.config;
 
-import tools.jackson.databind.ObjectMapper;
 import com.ssafy.culturepick.auth.filter.JwtAuthenticationFilter;
 import com.ssafy.culturepick.auth.filter.LoginFilter;
 import com.ssafy.culturepick.auth.jwt.TokenProvider;
+import com.ssafy.culturepick.auth.oauth2.CustomOauth2MemberService;
+import com.ssafy.culturepick.auth.oauth2.OAuth2FailureHandler;
+import com.ssafy.culturepick.auth.oauth2.OAuth2SuccessHandler;
+import com.ssafy.culturepick.auth.oauth2.Oauth2AuthorizationRequestCookieRepository;
 import com.ssafy.culturepick.auth.security.CustomMemberDetailsService;
 import com.ssafy.culturepick.auth.security.JwtAccessDeniedHandler;
 import com.ssafy.culturepick.auth.security.JwtAuthenticationEntryPoint;
@@ -24,6 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -32,12 +36,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    private final CustomMemberDetailsService memberDetailsService;
     private final TokenProvider tokenProvider;
-    private final RefreshTokenService refreshTokenService;
     private final ObjectMapper objectMapper;
+    private final RefreshTokenService refreshTokenService;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final CustomMemberDetailsService memberDetailsService;
+
+    private final CustomOauth2MemberService customOauth2MemberService;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final Oauth2AuthorizationRequestCookieRepository oauth2AuthorizationRequestCookieRepository;
 
     @Value("${cors.allowed-origins}")
     private String allowedOrigins;
@@ -57,7 +66,17 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated())
+
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestRepository(oauth2AuthorizationRequestCookieRepository))
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOauth2MemberService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler))
+
 
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
@@ -75,7 +94,7 @@ public class WebSecurityConfig {
 
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of(allowedOrigins));
-        config.setAllowedMethods(List.of("HEAD","POST","GET","DELETE", "PUT", "PATCH"));
+        config.setAllowedMethods(List.of("HEAD", "POST", "GET", "DELETE", "PUT", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

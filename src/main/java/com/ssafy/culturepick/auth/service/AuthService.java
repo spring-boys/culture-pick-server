@@ -34,7 +34,8 @@ public class AuthService {
             throw new BusinessException(AuthErrorCode.EMAIL_NOT_VERIFIED);
         }
 
-        Member member = Member.create(request.getEmail(), passwordEncoder.encode(request.getPassword()), request.getNickname());
+        Member member = Member.createLocalMember(
+                request.getEmail(), passwordEncoder.encode(request.getPassword()), request.getNickname());
         memberRepository.save(member);
 
         emailVerificationRepository.deleteVerified(request.getEmail());

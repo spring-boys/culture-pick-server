@@ -3,7 +3,6 @@ package com.ssafy.culturepick.member.domain;
 import com.ssafy.culturepick.global.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,23 +28,35 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    private String providerId;
+
     private Member(Long id, Role role) {
         this.id = id;
         this.role = role;
     }
 
-    private Member(String email, String password, String nickname, Role role) {
+    private Member(String email, String password, String nickname, Role role, Provider provider, String providerId) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.role = role;
+        this.provider = provider;
+        this.providerId = providerId;
     }
 
     public static Member createMemberByToken(Long id, Role role) {
         return new Member(id, role);
     }
 
-    public static Member create(String email, String encodedPassword, String nickname) {
-        return new Member(email, encodedPassword, nickname, Role.ROLE_MEMBER);
+    public static Member createLocalMember(String email, String encodedPassword, String nickname) {
+        return new Member(email, encodedPassword, nickname, Role.ROLE_MEMBER, Provider.LOCAL, null);
+    }
+
+    public static Member createGoogleMember(String email, String nickname, String providerId) {
+        return new Member(email, null, nickname, Role.ROLE_MEMBER, Provider.GOOGLE, providerId);
     }
 }
