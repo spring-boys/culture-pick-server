@@ -10,6 +10,7 @@ import com.ssafy.culturepick.auth.service.EmailVerificationService;
 import com.ssafy.culturepick.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class AuthController {
     private boolean cookieSecure;
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody SignupRequest request) {
+    public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest request) {
         authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -57,13 +58,13 @@ public class AuthController {
     }
 
     @PostMapping("/email/code")
-    public ResponseEntity<Void> sendCode(@RequestBody SendCodeRequest request) {
+    public ResponseEntity<Void> sendCode(@Valid @RequestBody SendCodeRequest request) {
         emailVerificationService.sendCode(request.getEmail());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/email/verification")
-    public ResponseEntity<Void> verifyCode(@RequestBody VerifyCodeRequest request) {
+    public ResponseEntity<Void> verifyCode(@Valid @RequestBody VerifyCodeRequest request) {
         emailVerificationService.verifyCode(request.getEmail(), request.getCode());
         return ResponseEntity.ok().build();
     }
