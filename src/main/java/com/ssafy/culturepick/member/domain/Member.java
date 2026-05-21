@@ -1,0 +1,62 @@
+package com.ssafy.culturepick.member.domain;
+
+import com.ssafy.culturepick.global.domain.BaseEntity;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Member extends BaseEntity {
+
+    @Id
+    @Column(name = "member_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String email;
+
+    private String password;
+
+    @Column(length = 15)
+    private String nickname;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    private String providerId;
+
+    private Member(Long id, Role role) {
+        this.id = id;
+        this.role = role;
+    }
+
+    private Member(String email, String password, String nickname, Role role, Provider provider, String providerId) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.role = role;
+        this.provider = provider;
+        this.providerId = providerId;
+    }
+
+    public static Member createMemberByToken(Long id, Role role) {
+        return new Member(id, role);
+    }
+
+    public static Member createLocalMember(String email, String encodedPassword, String nickname) {
+        return new Member(email, encodedPassword, nickname, Role.ROLE_MEMBER, Provider.LOCAL, null);
+    }
+
+    public static Member createGoogleMember(String email, String nickname, String providerId) {
+        return new Member(email, null, nickname, Role.ROLE_MEMBER, Provider.GOOGLE, providerId);
+    }
+}
