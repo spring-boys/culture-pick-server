@@ -2,7 +2,9 @@ package com.ssafy.culturepick.auth.service;
 
 import com.ssafy.culturepick.auth.repository.EmailVerificationRepository;
 import com.ssafy.culturepick.global.exception.code.AuthErrorCode;
+import com.ssafy.culturepick.global.exception.code.MemberErrorCode;
 import com.ssafy.culturepick.global.exception.type.BusinessException;
+import com.ssafy.culturepick.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,8 +18,13 @@ public class EmailVerificationService {
 
     private final JavaMailSender javaMailSender;
     private final EmailVerificationRepository emailVerificationRepository;
+    private final MemberRepository memberRepository;
 
     public void sendCode(String email) {
+        if (memberRepository.findByEmail(email).isPresent()) {
+            throw new BusinessException(MemberErrorCode.DUPLICATE_EMAIL);
+        }
+
         emailVerificationRepository.deleteVerified(email);
 
         String code = generateCode();

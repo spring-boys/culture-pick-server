@@ -34,6 +34,10 @@ public class AuthService {
             throw new BusinessException(AuthErrorCode.EMAIL_NOT_VERIFIED);
         }
 
+        if (memberRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new BusinessException(MemberErrorCode.DUPLICATE_EMAIL);
+        }
+
         Member member = Member.createLocalMember(
                 request.getEmail(), passwordEncoder.encode(request.getPassword()), request.getNickname());
         memberRepository.save(member);
@@ -42,7 +46,7 @@ public class AuthService {
     }
 
     public RegenerateToken regenerate(String refreshToken) {
-        if (refreshToken == null) {
+        if (refreshToken == null || refreshToken.isBlank()) {
             throw new BusinessException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
         }
 
