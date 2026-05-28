@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest //회원가입용 통합 테스트
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc // MockMvc를 자동 설정해서 실제 서버를 띄우지 않고 HTTP 요청 방식으로 API 테스트
 @ActiveProfiles("test") // 실제 실행 시 application.yaml 대신 application-test.yaml 적용
 class AuthSignupIntegrationTest {
 
@@ -43,7 +43,8 @@ class AuthSignupIntegrationTest {
     void tearDown() {
         memberRepository.deleteAll();
         emailVerificationRepository.deleteVerified("signup-success@example.com");
-        emailVerificationRepository.deleteVerified("not-verified@example.com");
+        emailVerificationRepository.deleteVerified("not-verified@example.com");    emailVerificationRepository.deleteVerified("duplicate@example.com");
+        emailVerificationRepository.deleteVerified("duplicate@example.com");
     }
 
     @Test //정상 회원가입 성공 케이스
@@ -102,4 +103,45 @@ class AuthSignupIntegrationTest {
         Optional<Member> savedMember = memberRepository.findByEmail(email);
         assertThat(savedMember).isEmpty();
     }
+
+    @Test //실패 케이스 검증
+    @DisplayName("이미 가입된 이메일로 회원가입하면 실패하고, 회원 정보가 추가로 저장되지 않는다")
+    void signup_fail_whenEmailAlreadyExists() throws Exception {
+        // given
+        String email = "duplicate@example.com";
+        String rawPassword = "password123";
+        String existingNickname = "기존회원";
+
+        Member existingMember = Member.createLocalMember(
+                email,
+                passwordEncoder.encode(rawPassword),
+                existingNickname
+        );
+        memberRepository.save(existingMember); //이미 회원이 DB에 존재함
+
+        emailVerificationRepository.saveVerified(email); //이메일 인증코드 검증 완료(중복 메일 걸리게 하기 위함)
+
+        String requestBody = """
+            {
+              "email": "%s",
+              "password": "password456",
+              "nickname": "새회원"
+            }
+            """.formatted(email);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .contentType(APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest()); //중복 이메일 검증
+
+        java.util.List<Member> members = memberRepository.findAll().stream()
+                .filter(member -> member.getEmail().equals(email))
+                .toList();
+
+        assertThat(members).hasSize(1); //1개 (DB검증)
+        assertThat(members.get(0).getNickname()).isEqualTo(existingNickname); //기존 회원 정보 유지
+        assertThat(passwordEncoder.matches(rawPassword, members.get(0).getPassword())).isTrue();
+    }
+
 }
