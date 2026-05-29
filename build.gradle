@@ -49,6 +49,9 @@ dependencies {
     // MAIL
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+    // XML
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+
     // TEST
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client-test'
