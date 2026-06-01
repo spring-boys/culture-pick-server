@@ -47,14 +47,20 @@ public class Culture extends BaseEntity {
     private Double gpsX;
     private Double gpsY;
 
-    // TODO bookmarkCount -> 쿼리로 조회
+    private int bookmarkCount;
+
+    public void incrementBookmarkCount() {
+        this.bookmarkCount++;
+    }
+
+    public void decrementBookmarkCount() {
+        if (this.bookmarkCount > 0) this.bookmarkCount--;
+    }
 
     @Builder
     private Culture(
             Long seq, CultureCategory category, String title, LocalDate startDate, LocalDate endDate,
-            String thumbnail, String area, String sigungu, String place,
-            String placeUrl, String url, String phone, String placeAddr,
-            Long placeSeq, String price, Double gpsX, Double gpsY
+            String thumbnail, String area, String sigungu, String place, Double gpsX, Double gpsY
     ) {
         this.seq = seq;
         this.category = category;
@@ -65,21 +71,13 @@ public class Culture extends BaseEntity {
         this.area = area;
         this.sigungu = sigungu;
         this.place = place;
-        this.placeUrl = placeUrl;
-        this.url = url;
-        this.phone = phone;
-        this.placeAddr = placeAddr;
-        this.placeSeq = placeSeq;
-        this.price = price;
         this.gpsX = gpsX;
         this.gpsY = gpsY;
     }
 
     public void update(
             String title, CultureCategory category, LocalDate startDate, LocalDate endDate,
-            String thumbnail, String area, String sigungu, String place,
-            String placeUrl, String url, String phone, String placeAddr,
-            Long placeSeq, String price, Double gpsX, Double gpsY
+            String thumbnail, String area, String sigungu, String place, Double gpsX, Double gpsY
     ) {
         this.title = title;
         this.category = category;
@@ -89,13 +87,20 @@ public class Culture extends BaseEntity {
         this.area = area;
         this.sigungu = sigungu;
         this.place = place;
-        this.placeUrl = placeUrl;
-        this.url = url;
-        this.phone = phone;
-        this.placeAddr = placeAddr;
-        this.placeSeq = placeSeq;
-        this.price = price;
         this.gpsX = gpsX;
         this.gpsY = gpsY;
+    }
+
+    public void updateDetail(
+            String price, String url, String phone, String imgUrl,
+            String placeUrl, String placeAddr, Long placeSeq
+    ) {
+        this.price = price;
+        this.url = url;
+        this.phone = phone;
+        if (this.thumbnail == null) this.thumbnail = imgUrl;
+        this.placeUrl = placeUrl;
+        this.placeAddr = placeAddr;
+        this.placeSeq = placeSeq;
     }
 }

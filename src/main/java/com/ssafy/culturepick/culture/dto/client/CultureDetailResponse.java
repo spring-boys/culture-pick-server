@@ -1,5 +1,7 @@
 package com.ssafy.culturepick.culture.dto.client;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,13 +16,10 @@ public class CultureDetailResponse {
     @Getter
     @NoArgsConstructor
     public static class Body {
-        private Items items;
-    }
 
-    @Getter
-    @NoArgsConstructor
-    public static class Items {
-        private Item item;
+        @JacksonXmlProperty(localName = "item")
+        @JacksonXmlElementWrapper(localName = "items")
+        private Item items;
     }
 
     @Getter

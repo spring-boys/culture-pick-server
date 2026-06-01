@@ -1,4 +1,4 @@
-package com.ssafy.culturepick.culture;
+package com.ssafy.culturepick.culture.controller;
 
 import com.ssafy.culturepick.culture.service.CultureBatchService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/dev")
-public class CultureController {
+public class CultureDevController {
 
     private final CultureBatchService cultureBatchService;
 

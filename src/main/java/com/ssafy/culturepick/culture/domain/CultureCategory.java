@@ -1,5 +1,7 @@
 package com.ssafy.culturepick.culture.domain;
 
+import com.ssafy.culturepick.global.exception.code.CultureErrorCode;
+import com.ssafy.culturepick.global.exception.type.BusinessException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +22,6 @@ public enum CultureCategory {
         return Arrays.stream(values())
                 .filter(c -> c.description.equals(koreanName))
                 .findFirst()
-                // TODO CultureErrorCode 처리
-                .orElseThrow(() -> new IllegalArgumentException("알 수 없는 카테고리: " + koreanName));
+                .orElseThrow(() -> new BusinessException(CultureErrorCode.UNSUPPORTED_CATEGORY));
     }
 }
