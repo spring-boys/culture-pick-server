@@ -38,10 +38,9 @@ public class ChatService {
         chatRoomMemberRepository.findByChatRoom_IdAndMember_Id(chatRoomId, memberId)
                 .ifPresentOrElse(
                         chatRoomMember -> {
-                            if (chatRoomMember.isActive()) {
-                                throw new BusinessException(ChatErrorCode.ALREADY_JOINED_CHAT_ROOM);
+                            if (!chatRoomMember.isActive()) {
+                                chatRoomMember.rejoin();
                             }
-                            chatRoomMember.rejoin();
                         },
                         () -> chatRoomMemberRepository.save(ChatRoomMember.join(chatRoom, member))
                 );

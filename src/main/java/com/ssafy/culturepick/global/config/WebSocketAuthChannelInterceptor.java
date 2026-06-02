@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
+public class WebSocketAuthChannelInterceptor implements ChannelInterceptor { //WebSocket 연결 이후 STOMP 메시지에 대한 인증/인가 검사를 직접 수행하기 위한 인터셉터
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
@@ -29,22 +29,22 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+    public Message<?> preSend(Message<?> message, MessageChannel channel) { //클라이언트에서 서버로 들어오는 STOMP 메시지가 처리되기 전에 실행되는 메서드
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (accessor == null || accessor.getCommand() == null) {
             return message;
         }
 
-        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) { //JWT 토큰 검증
             authenticate(accessor);
         }
 
-        if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+        if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) { //해당 채팅방 참여자인지 검증
             validateSubscription(accessor);
         }
 
-        if (StompCommand.SEND.equals(accessor.getCommand())) {
+        if (StompCommand.SEND.equals(accessor.getCommand())) { // 클라이언트가 /topic/**으로 직접 보내는 잘못된 전송 차단
             validateSendDestination(accessor);
         }
 
