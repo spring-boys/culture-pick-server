@@ -6,10 +6,12 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 @JacksonXmlRootElement(localName = "response")
-public class CultureDetailResponse {
+public class CultureDetailApiResponse {
 
     private Body body;
 
@@ -19,7 +21,7 @@ public class CultureDetailResponse {
 
         @JacksonXmlProperty(localName = "item")
         @JacksonXmlElementWrapper(localName = "items")
-        private Item items;
+        private List<Item> items;
     }
 
     @Getter

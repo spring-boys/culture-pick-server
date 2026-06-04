@@ -71,7 +71,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/v1/dev/fetch").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/cultures").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/cultures/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/cultures/**").permitAll()
                         .anyRequest().authenticated())
 
                 .oauth2Login(oauth2 -> oauth2

@@ -1,13 +1,18 @@
 package com.ssafy.culturepick.culture.service;
 
 import com.ssafy.culturepick.bookmark.repository.BookmarkRepository;
+import com.ssafy.culturepick.culture.client.CultureApiClient;
 import com.ssafy.culturepick.culture.domain.Culture;
 import com.ssafy.culturepick.culture.domain.CultureCategory;
+import com.ssafy.culturepick.culture.dto.client.CultureDetailApiResponse;
+import com.ssafy.culturepick.culture.dto.response.CultureDetailResponse;
 import com.ssafy.culturepick.culture.dto.response.CultureListResponse;
 import com.ssafy.culturepick.culture.dto.response.CultureSummary;
 import com.ssafy.culturepick.culture.dto.response.DayResponse;
 import com.ssafy.culturepick.culture.repository.CultureRepository;
 import com.ssafy.culturepick.global.common.SliceResponse;
+import com.ssafy.culturepick.global.exception.code.CultureErrorCode;
+import com.ssafy.culturepick.global.exception.type.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -33,6 +38,7 @@ public class CultureService {
 
     private final CultureRepository cultureRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final CultureApiClient cultureApiClient;
 
     public List<DayResponse> getCalendar(int year, int month, String keyword, String area, CultureCategory category, Long memberId) {
         YearMonth yearMonth = YearMonth.of(year, month);
@@ -76,6 +82,22 @@ public class CultureService {
                 .toList();
 
         return SliceResponse.of(slice, content);
+    }
+
+    @Transactional
+    public CultureDetailResponse getDetail(Long id, Long memberId) {
+        Culture culture = cultureRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(CultureErrorCode.CULTURE_NOT_FOUND));
+
+        if (culture.getUrl() == null) {
+            CultureDetailApiResponse apiResponse = cultureApiClient.getDetail(culture.getSeq());
+            CultureDetailApiResponse.Item item = apiResponse.getBody().getItems().get(0);
+            culture.updateDetail(item.getPrice(), item.getUrl(), item.getPhone(),
+                    item.getImgUrl(), item.getPlaceUrl(), item.getPlaceAddr(), item.getPlaceSeq());
+        }
+
+        boolean isBookmarked = memberId != null && bookmarkRepository.existsByMemberIdAndCultureId(memberId, id);
+        return CultureDetailResponse.from(culture, isBookmarked);
     }
 
     private Set<Long> getBookmarkedIds(Long memberId, Collection<Culture> cultures) {

@@ -3,10 +3,11 @@ package com.ssafy.culturepick.culture.service;
 import com.ssafy.culturepick.culture.client.CultureApiClient;
 import com.ssafy.culturepick.culture.domain.Culture;
 import com.ssafy.culturepick.culture.domain.CultureCategory;
-import com.ssafy.culturepick.culture.dto.client.CultureListResponse;
+import com.ssafy.culturepick.culture.dto.client.CultureListApiResponse;
 import com.ssafy.culturepick.culture.repository.CultureRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,17 +24,18 @@ public class CultureBatchService {
     private final CultureApiClient cultureApiClient;
     private final CultureRepository cultureRepository;
 
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
     @Transactional
     public void fetchAndSaveAll() {
-        CultureListResponse listResponse = cultureApiClient.getList();
-        List<CultureListResponse.Item> items = listResponse.getBody().getItems();
+        CultureListApiResponse listResponse = cultureApiClient.getList();
+        List<CultureListApiResponse.Item> items = listResponse.getBody().getItems();
 
         if (items == null) {
             log.warn("문화 목록 조회 결과가 없습니다.");
             return;
         }
 
-        for (CultureListResponse.Item item : items) {
+        for (CultureListApiResponse.Item item : items) {
             try {
                 cultureRepository.findBySeq(item.getSeq())
                         .ifPresentOrElse(

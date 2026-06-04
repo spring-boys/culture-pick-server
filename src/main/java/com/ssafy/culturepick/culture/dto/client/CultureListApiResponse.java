@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @JacksonXmlRootElement(localName = "response")
-public class CultureListResponse {
+public class CultureListApiResponse {
 
     private Body body; // 필드가 없으면 <body> 태그 무시하고 지나간대
 

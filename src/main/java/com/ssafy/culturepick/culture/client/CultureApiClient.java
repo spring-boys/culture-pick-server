@@ -1,7 +1,7 @@
 package com.ssafy.culturepick.culture.client;
 
-import com.ssafy.culturepick.culture.dto.client.CultureDetailResponse;
-import com.ssafy.culturepick.culture.dto.client.CultureListResponse;
+import com.ssafy.culturepick.culture.dto.client.CultureDetailApiResponse;
+import com.ssafy.culturepick.culture.dto.client.CultureListApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -21,7 +21,7 @@ public class CultureApiClient {
     @Value("${culture.api.service-key}")
     private String serviceKey;
 
-    public CultureListResponse getList() {
+    public CultureListApiResponse getList() {
         String url = UriComponentsBuilder.fromUriString(baseUrl)
                 .path("/period2")
                 .queryParam("serviceKey", serviceKey)
@@ -34,10 +34,10 @@ public class CultureApiClient {
                 .uri(url)
                 .accept(MediaType.APPLICATION_XML)
                 .retrieve()
-                .body(CultureListResponse.class);
+                .body(CultureListApiResponse.class);
     }
 
-    public CultureDetailResponse getDetail(Long seq) {
+    public CultureDetailApiResponse getDetail(Long seq) {
         String url = UriComponentsBuilder.fromUriString(baseUrl)
                 .path("/detail2")
                 .queryParam("serviceKey", serviceKey)
@@ -48,6 +48,6 @@ public class CultureApiClient {
                 .uri(url)
                 .accept(MediaType.APPLICATION_XML)
                 .retrieve()
-                .body(CultureDetailResponse.class);
+                .body(CultureDetailApiResponse.class);
     }
 }

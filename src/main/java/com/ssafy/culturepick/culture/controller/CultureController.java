@@ -2,6 +2,7 @@ package com.ssafy.culturepick.culture.controller;
 
 import com.ssafy.culturepick.auth.security.CustomMemberDetails;
 import com.ssafy.culturepick.culture.domain.CultureCategory;
+import com.ssafy.culturepick.culture.dto.response.CultureDetailResponse;
 import com.ssafy.culturepick.culture.dto.response.CultureListResponse;
 import com.ssafy.culturepick.culture.dto.response.DayResponse;
 import com.ssafy.culturepick.culture.service.CultureService;
@@ -27,6 +28,15 @@ public class CultureController {
 
     private final CultureService cultureService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CultureDetailResponse> getDetail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomMemberDetails memberDetails
+    ) {
+        Long memberId = memberDetails != null ? memberDetails.getId() : null;
+        return ResponseEntity.ok(cultureService.getDetail(id, memberId));
+    }
+
     @GetMapping
     public ResponseEntity<List<DayResponse>> getCalendar(
             @RequestParam(required = false) Integer year,
@@ -43,7 +53,7 @@ public class CultureController {
         return ResponseEntity.ok(cultureService.getCalendar(y, m, keyword, area, category, memberId));
     }
 
-    @GetMapping("/{date}")
+    @GetMapping("/date/{date}")
     public ResponseEntity<SliceResponse<CultureListResponse>> getList(
             @PathVariable LocalDate date,
             @RequestParam(required = false) String keyword,
