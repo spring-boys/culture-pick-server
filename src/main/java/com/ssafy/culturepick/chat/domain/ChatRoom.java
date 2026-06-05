@@ -1,6 +1,6 @@
 package com.ssafy.culturepick.chat.domain;
 
-import com.ssafy.culturepick.culture.domain.CultureTemp;
+import com.ssafy.culturepick.culture.domain.Culture;
 import com.ssafy.culturepick.global.domain.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,9 +39,9 @@ public class ChatRoom extends BaseEntity {
     @JoinColumn(
             name = "culture_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_chat_room_culture_temp")
+            foreignKey = @ForeignKey(name = "fk_chat_room_culture")
     )
-    private CultureTemp culture;
+    private Culture culture;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -49,12 +49,12 @@ public class ChatRoom extends BaseEntity {
     @Column(name = "last_message_at")
     private LocalDateTime lastMessageAt;
 
-    private ChatRoom(CultureTemp culture, String name) {
+    private ChatRoom(Culture culture, String name) {
         this.culture = culture;
         this.name = name;
     }
 
-    public static ChatRoom create(CultureTemp culture, String name) {
+    public static ChatRoom create(Culture culture, String name) {
         return new ChatRoom(culture, name);
     }
 
