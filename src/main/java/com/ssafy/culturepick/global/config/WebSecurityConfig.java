@@ -13,6 +13,7 @@ import com.ssafy.culturepick.auth.security.JwtAuthenticationEntryPoint;
 import com.ssafy.culturepick.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.ProviderManager;
@@ -68,6 +69,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/ws/**", "/ws").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/api/v1/dev/fetch").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/cultures").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/cultures/**").permitAll()
                         .anyRequest().authenticated())
 
                 .oauth2Login(oauth2 -> oauth2

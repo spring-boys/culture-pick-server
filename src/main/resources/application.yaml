@@ -50,3 +50,8 @@ springdoc:
     enabled: false
   api-docs:
     enabled: false
+
+culture:
+  api:
+    base-url: https://apis.data.go.kr/B553457/cultureinfo
+    service-key: ${CULTURE_API_KEY}
