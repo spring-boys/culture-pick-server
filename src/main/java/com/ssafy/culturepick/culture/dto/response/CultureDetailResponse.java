@@ -28,8 +28,9 @@ public class CultureDetailResponse {
     private String phone;
     private int bookmarkCount;
     private boolean isBookmarked;
+    private Long chatRoomId;
 
-    public static CultureDetailResponse from(Culture culture, boolean isBookmarked) {
+    public static CultureDetailResponse from(Culture culture, boolean isBookmarked, Long chatRoomId) {
         return CultureDetailResponse.builder()
                 .id(culture.getId())
                 .title(culture.getTitle())
@@ -49,6 +50,7 @@ public class CultureDetailResponse {
                 .phone(culture.getPhone())
                 .bookmarkCount(culture.getBookmarkCount())
                 .isBookmarked(isBookmarked)
+                .chatRoomId(chatRoomId)
                 .build();
     }
 }

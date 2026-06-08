@@ -1,6 +1,8 @@
 package com.ssafy.culturepick.culture.service;
 
 import com.ssafy.culturepick.bookmark.repository.BookmarkRepository;
+import com.ssafy.culturepick.chat.domain.ChatRoom;
+import com.ssafy.culturepick.chat.repository.ChatRoomRepository;
 import com.ssafy.culturepick.culture.client.CultureApiClient;
 import com.ssafy.culturepick.culture.domain.Culture;
 import com.ssafy.culturepick.culture.domain.CultureCategory;
@@ -39,6 +41,7 @@ public class CultureService {
     private final CultureRepository cultureRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CultureApiClient cultureApiClient;
+    private final ChatRoomRepository chatRoomRepository;
 
     public List<DayResponse> getCalendar(int year, int month, String keyword, String area, CultureCategory category, Long memberId) {
         YearMonth yearMonth = YearMonth.of(year, month);
@@ -97,7 +100,13 @@ public class CultureService {
         }
 
         boolean isBookmarked = memberId != null && bookmarkRepository.existsByMemberIdAndCultureId(memberId, id);
-        return CultureDetailResponse.from(culture, isBookmarked);
+        Long chatRoomId = getOrCreateChatRoom(culture).getId();
+        return CultureDetailResponse.from(culture, isBookmarked, chatRoomId);
+    }
+
+    private ChatRoom getOrCreateChatRoom(Culture culture) {
+        return chatRoomRepository.findByCulture_Id(culture.getId())
+                .orElseGet(() -> chatRoomRepository.save(ChatRoom.create(culture, culture.getTitle() + " 채팅방")));
     }
 
     private Set<Long> getBookmarkedIds(Long memberId, Collection<Culture> cultures) {
