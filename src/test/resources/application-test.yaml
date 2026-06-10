@@ -52,3 +52,8 @@ springdoc:
     enabled: false
   api-docs:
     enabled: false
+
+culture:
+  api:
+    base-url: http://localhost:9999/culture-test
+    service-key: test-culture-api-key
