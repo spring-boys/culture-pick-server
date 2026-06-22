@@ -59,4 +59,8 @@ public class Member extends BaseEntity {
     public static Member createGoogleMember(String email, String nickname, String providerId) {
         return new Member(email, null, nickname, Role.ROLE_MEMBER, Provider.GOOGLE, providerId);
     }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }
