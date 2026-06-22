@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.culturepick.review.mapper.ReviewMapper">
+
+    <resultMap id="ReviewMapperResultMap" type="com.ssafy.culturepick.review.mapper.ReviewMapperResult">
+        <id property="id" column="review_id"/>
+        <result property="cultureId" column="culture_id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="memberNickname" column="member_nickname"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="ReviewSelectColumns">
+        r.review_id,
+        r.culture_id,
+        r.member_id,
+        m.nickname AS member_nickname,
+        r.content,
+        r.created_at,
+        r.updated_at
+    </sql>
+
+    <insert id="insert"
+            parameterType="com.ssafy.culturepick.review.mapper.ReviewCreateCommand"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO review (
+            culture_id,
+            member_id,
+            content,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{cultureId},
+            #{memberId},
+            #{content},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <select id="findAllByCultureId" resultMap="ReviewMapperResultMap">
+        SELECT
+            <include refid="ReviewSelectColumns"/>
+        FROM review r
+        JOIN member m ON r.member_id = m.member_id
+        WHERE r.culture_id = #{cultureId}
+        ORDER BY r.created_at DESC
+    </select>
+
+    <select id="findById" resultMap="ReviewMapperResultMap">
+        SELECT
+            <include refid="ReviewSelectColumns"/>
+        FROM review r
+        JOIN member m ON r.member_id = m.member_id
+        WHERE r.review_id = #{reviewId}
+    </select>
+
+    <update id="updateContent">
+        UPDATE review
+        SET
+            content = #{content},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE review_id = #{reviewId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM review
+        WHERE review_id = #{reviewId}
+    </delete>
+</mapper>

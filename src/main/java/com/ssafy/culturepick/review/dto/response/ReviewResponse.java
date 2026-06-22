@@ -1,6 +1,7 @@
 package com.ssafy.culturepick.review.dto.response;
 
 import com.ssafy.culturepick.review.domain.Review;
+import com.ssafy.culturepick.review.mapper.ReviewMapperResult;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -36,6 +37,20 @@ public class ReviewResponse {
                 review.getCulture().getId(),
                 writerId,
                 review.getMember().getNickname(),
+                review.getContent(),
+                currentMemberId != null && currentMemberId.equals(writerId),
+                review.getCreatedAt(),
+                review.getUpdatedAt()
+        );
+    }
+
+    public static ReviewResponse from(ReviewMapperResult review, Long currentMemberId) {
+        Long writerId = review.getMemberId();
+        return new ReviewResponse(
+                review.getId(),
+                review.getCultureId(),
+                writerId,
+                review.getMemberNickname(),
                 review.getContent(),
                 currentMemberId != null && currentMemberId.equals(writerId),
                 review.getCreatedAt(),

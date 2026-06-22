@@ -1,17 +1,16 @@
 package com.ssafy.culturepick.review.service;
 
-import com.ssafy.culturepick.culture.domain.Culture;
 import com.ssafy.culturepick.culture.repository.CultureRepository;
 import com.ssafy.culturepick.global.exception.code.CultureErrorCode;
 import com.ssafy.culturepick.global.exception.code.MemberErrorCode;
 import com.ssafy.culturepick.global.exception.code.ReviewErrorCode;
 import com.ssafy.culturepick.global.exception.type.BusinessException;
-import com.ssafy.culturepick.member.domain.Member;
 import com.ssafy.culturepick.member.repository.MemberRepository;
-import com.ssafy.culturepick.review.domain.Review;
 import com.ssafy.culturepick.review.dto.request.ReviewRequest;
 import com.ssafy.culturepick.review.dto.response.ReviewResponse;
-import com.ssafy.culturepick.review.repository.ReviewRepository;
+import com.ssafy.culturepick.review.mapper.ReviewCreateCommand;
+import com.ssafy.culturepick.review.mapper.ReviewMapper;
+import com.ssafy.culturepick.review.mapper.ReviewMapperResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,61 +22,68 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReviewService {
 
-    private final ReviewRepository reviewRepository;
+    private final ReviewMapper reviewMapper;
     private final CultureRepository cultureRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
     public ReviewResponse createReview(Long cultureId, Long memberId, ReviewRequest request) {
-        Culture culture = getCulture(cultureId);
-        Member member = getMember(memberId);
-        Review review = reviewRepository.save(Review.create(culture, member, request.getContent()));
+        validateCultureExists(cultureId);
+        validateMemberExists(memberId);
 
-        return ReviewResponse.from(review, memberId);
+        ReviewCreateCommand command = new ReviewCreateCommand(cultureId, memberId, request.getContent());
+        reviewMapper.insert(command);
+
+        return ReviewResponse.from(getReview(command.getId()), memberId);
     }
 
     public List<ReviewResponse> getReviews(Long cultureId, Long memberId) {
-        getCulture(cultureId);
+        validateCultureExists(cultureId);
 
-        return reviewRepository.findByCulture_IdOrderByCreatedAtDesc(cultureId).stream()
+        return reviewMapper.findAllByCultureId(cultureId).stream()
                 .map(review -> ReviewResponse.from(review, memberId))
                 .toList();
     }
 
     @Transactional
     public ReviewResponse updateReview(Long reviewId, Long memberId, ReviewRequest request) {
-        Review review = getReview(reviewId);
+        ReviewMapperResult review = getReview(reviewId);
         validateOwner(review, memberId);
 
-        review.updateContent(request.getContent());
-        return ReviewResponse.from(review, memberId);
+        reviewMapper.updateContent(reviewId, request.getContent());
+        return ReviewResponse.from(getReview(reviewId), memberId);
     }
 
     @Transactional
     public void deleteReview(Long reviewId, Long memberId) {
-        Review review = getReview(reviewId);
+        ReviewMapperResult review = getReview(reviewId);
         validateOwner(review, memberId);
 
-        reviewRepository.delete(review);
+        reviewMapper.deleteById(reviewId);
     }
 
-    private Culture getCulture(Long cultureId) {
-        return cultureRepository.findById(cultureId)
-                .orElseThrow(() -> new BusinessException(CultureErrorCode.CULTURE_NOT_FOUND));
+    private void validateCultureExists(Long cultureId) {
+        if (!cultureRepository.existsById(cultureId)) {
+            throw new BusinessException(CultureErrorCode.CULTURE_NOT_FOUND);
+        }
     }
 
-    private Member getMember(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND));
+    private void validateMemberExists(Long memberId) {
+        if (!memberRepository.existsById(memberId)) {
+            throw new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND);
+        }
     }
 
-    private Review getReview(Long reviewId) {
-        return reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new BusinessException(ReviewErrorCode.REVIEW_NOT_FOUND));
+    private ReviewMapperResult getReview(Long reviewId) {
+        ReviewMapperResult review = reviewMapper.findById(reviewId);
+        if (review == null) {
+            throw new BusinessException(ReviewErrorCode.REVIEW_NOT_FOUND);
+        }
+        return review;
     }
 
-    private void validateOwner(Review review, Long memberId) {
-        if (!review.getMember().getId().equals(memberId)) {
+    private void validateOwner(ReviewMapperResult review, Long memberId) {
+        if (!review.getMemberId().equals(memberId)) {
             throw new BusinessException(ReviewErrorCode.NOT_REVIEW_OWNER);
         }
     }
