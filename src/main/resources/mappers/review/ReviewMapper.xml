@@ -43,6 +43,16 @@
         )
     </insert>
 
+    <select id="findPageByCultureId" resultMap="ReviewMapperResultMap">
+        SELECT
+            <include refid="ReviewSelectColumns"/>
+        FROM review r
+        JOIN member m ON r.member_id = m.member_id
+        WHERE r.culture_id = #{cultureId}
+        ORDER BY r.created_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
     <select id="findAllByCultureId" resultMap="ReviewMapperResultMap">
         SELECT
             <include refid="ReviewSelectColumns"/>

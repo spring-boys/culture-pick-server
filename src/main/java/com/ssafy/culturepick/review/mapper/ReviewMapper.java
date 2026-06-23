@@ -12,6 +12,10 @@ public interface ReviewMapper {
 
     List<ReviewMapperResult> findAllByCultureId(@Param("cultureId") Long cultureId);
 
+    List<ReviewMapperResult> findPageByCultureId(@Param("cultureId") Long cultureId,
+                                                  @Param("offset") int offset,
+                                                  @Param("size") int size);
+
     ReviewMapperResult findById(@Param("reviewId") Long reviewId);
 
     int updateContent(@Param("reviewId") Long reviewId, @Param("content") String content);

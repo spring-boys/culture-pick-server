@@ -4,6 +4,7 @@ import com.ssafy.culturepick.auth.security.CustomMemberDetails;
 import com.ssafy.culturepick.chat.dto.request.ChatMessageSendRequest;
 import com.ssafy.culturepick.chat.dto.response.ChatMessageEventResponse;
 import com.ssafy.culturepick.chat.dto.response.ChatMessageResponse;
+import com.ssafy.culturepick.chat.dto.response.ChatRoomResponse;
 import com.ssafy.culturepick.chat.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +31,9 @@ public class ChatRoomController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/{chatRoomId}/join")
-    public ResponseEntity<Void> joinChatRoom(@PathVariable Long chatRoomId,
-                                             @AuthenticationPrincipal CustomMemberDetails memberDetails) {
-        chatService.joinChatRoom(chatRoomId, memberDetails.getId());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ChatRoomResponse> joinChatRoom(@PathVariable Long chatRoomId,
+                                                         @AuthenticationPrincipal CustomMemberDetails memberDetails) {
+        return ResponseEntity.ok(chatService.joinChatRoom(chatRoomId, memberDetails.getId()));
     }
 
     @GetMapping("/{chatRoomId}/messages")
