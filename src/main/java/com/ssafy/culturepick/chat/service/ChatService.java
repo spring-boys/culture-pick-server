@@ -31,19 +31,20 @@ public class ChatService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void joinChatRoom(Long chatRoomId, Long memberId) {
+    public ChatRoomResponse joinChatRoom(Long chatRoomId, Long memberId) {
         ChatRoom chatRoom = getChatRoom(chatRoomId);
         Member member = getMember(memberId);
 
-        chatRoomMemberRepository.findByChatRoom_IdAndMember_Id(chatRoomId, memberId)
-                .ifPresentOrElse(
-                        chatRoomMember -> {
-                            if (!chatRoomMember.isActive()) {
-                                chatRoomMember.rejoin();
-                            }
-                        },
-                        () -> chatRoomMemberRepository.save(ChatRoomMember.join(chatRoom, member))
-                );
+        ChatRoomMember chatRoomMember = chatRoomMemberRepository.findByChatRoom_IdAndMember_Id(chatRoomId, memberId)
+                .map(existing -> {
+                    if (!existing.isActive()) {
+                        existing.rejoin();
+                    }
+                    return existing;
+                })
+                .orElseGet(() -> chatRoomMemberRepository.save(ChatRoomMember.join(chatRoom, member)));
+
+        return ChatRoomResponse.from(chatRoomMember);
     }
 
     public List<ChatMessageResponse> getMessages(Long chatRoomId, Long memberId) {
