@@ -63,7 +63,7 @@ class ReviewServiceMyBatisTest {
 
         // when
         // then
-        assertThat(reviewService.getReviews(culture.getId(), member.getId()))
+        assertThat(reviewService.getReviews(culture.getId(), member.getId(), 0, 10).getContent())
                 .hasSize(1)
                 .first()
                 .satisfies(review -> {
@@ -85,7 +85,7 @@ class ReviewServiceMyBatisTest {
         reviewService.deleteReview(created.getId(), member.getId());
 
         // then
-        assertThat(reviewService.getReviews(culture.getId(), member.getId())).isEmpty();
+        assertThat(reviewService.getReviews(culture.getId(), member.getId(), 0, 10).getContent()).isEmpty();
     }
 
     private Member saveMember(String email, String nickname) {

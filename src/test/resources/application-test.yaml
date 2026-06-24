@@ -57,3 +57,11 @@ culture:
   api:
     base-url: http://localhost:9999/culture-test
     service-key: test-culture-api-key
+
+mybatis:
+  mapper-locations: classpath:mappers/**/*.xml
+
+gms:
+  api:
+    url: http://localhost:9999/gms-test
+    key: test-gms-key

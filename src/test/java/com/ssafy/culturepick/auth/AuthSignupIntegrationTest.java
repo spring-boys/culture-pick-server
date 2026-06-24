@@ -1,6 +1,7 @@
 package com.ssafy.culturepick.auth;
 
 import com.ssafy.culturepick.auth.repository.EmailVerificationRepository;
+import com.ssafy.culturepick.config.RedisTestContainerConfig;
 import com.ssafy.culturepick.member.domain.Member;
 import com.ssafy.culturepick.member.domain.Provider;
 import com.ssafy.culturepick.member.domain.Role;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest //회원가입용 통합 테스트
 @AutoConfigureMockMvc // MockMvc를 자동 설정해서 실제 서버를 띄우지 않고 HTTP 요청 방식으로 API 테스트
 @ActiveProfiles("test") // 실제 실행 시 application.yaml 대신 application-test.yaml 적용
+@Import(RedisTestContainerConfig.class)
 class AuthSignupIntegrationTest {
 
     @Autowired
