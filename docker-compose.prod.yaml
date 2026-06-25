@@ -1,6 +1,6 @@
 services:
   spring-app:
-    image: ${ECR_REGISTRY}/github-actions-spring:latest
+    image: ${ECR_REGISTRY}/culture-pick-server:latest
     container_name: culturepick-spring
     restart: unless-stopped
     env_file:
