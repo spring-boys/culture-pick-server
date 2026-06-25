@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Profile({"local", "prod"})
+@Profile("local")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/dev")

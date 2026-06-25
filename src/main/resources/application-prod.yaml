@@ -1,8 +1,11 @@
+server:
+  forward-headers-strategy: framework
+
 spring:
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: false
