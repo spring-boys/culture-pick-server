@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+
+cookie:
+  secure: true
+
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false

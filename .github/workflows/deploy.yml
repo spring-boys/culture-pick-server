@@ -1,0 +1,83 @@
+name: Deploy To EC2
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # ── 1. 소스코드 체크아웃 ──────────────────────────────────────────
+      - name: Github Repository 체크아웃
+        uses: actions/checkout@v4
+
+      # ── 2. JDK 설치 ───────────────────────────────────────────────────
+      - name: JDK 17 설치
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # ── 3. Gradle 빌드 (-x test: CI에서 테스트 환경 미구성으로 스킵) ──
+      - name: Gradle 빌드
+        run: ./gradlew clean build -x test
+
+      # ── 4. AWS 자격증명 설정 ──────────────────────────────────────────
+      - name: AWS credentials 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-northeast-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # ── 5. ECR 로그인 (registry URL을 outputs으로 얻어냄) ─────────────
+      - name: ECR 로그인
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ── 6. Docker 이미지 빌드 & ECR Push ─────────────────────────────
+      - name: Docker 이미지 빌드 및 ECR Push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_NAME: github-actions-spring
+        run: |
+          docker build -t $ECR_REGISTRY/$IMAGE_NAME:latest .
+          docker push $ECR_REGISTRY/$IMAGE_NAME:latest
+
+      # ── 7. .env 생성 (secrets.ENV_FILE + ECR_REGISTRY 병합) ──────────
+      # ECR_REGISTRY는 ECR 로그인 후에 확정되므로 이 시점에 추가
+      - name: .env 생성
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+          echo "ECR_REGISTRY=$ECR_REGISTRY" >> .env
+
+      # ── 8. EC2로 파일 전송 (docker-compose, nginx 설정, .env) ─────────
+      # docker-compose.yaml과 nginx/ 폴더는 repo에 있고,
+      # .env는 위 단계에서 생성됨
+      - name: EC2로 배포 파일 전송 (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "docker-compose.prod.yaml,nginx,.env"
+          target: /home/ubuntu
+
+      # ── 9. SSH 접속 후 docker compose 기반 배포 ──────────────────────
+      - name: SSH 접속 및 배포
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu
+
+            docker compose -f docker-compose.prod.yaml pull spring-app
+            docker compose -f docker-compose.prod.yaml up -d --force-recreate
+            docker image prune -f
